@@ -15,3 +15,8 @@ runs/*/
 .DS_Store
 *.log
 .pi/
+
+# python
+__pycache__/
+.pytest_cache/
+
