@@ -1,6 +1,17 @@
+# deps / build
 node_modules/
 dist/
-runs/*/
-!runs/README.md
 .env
 *.db
+
+# private harness state — local only, not for GitHub
+PLAN.md
+memory/short.json
+memory/playbook.md
+runs/*/
+!runs/README.md
+
+# os / logs
+.DS_Store
+*.log
+.pi/
