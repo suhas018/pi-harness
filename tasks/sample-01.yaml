@@ -1,0 +1,10 @@
+id: sample-01
+goal: Add GET /health endpoint to FastAPI app that returns {status: "ok"}
+files:
+  - src/app.py
+  - tests/test_health.py
+verifier:
+  - pytest -q
+  - curl -s http://localhost:8000/health | grep -q '"status": "ok"'
+success: verifier exit 0
+notes: Simple task to test harness loop + sensors + trajectory logging
