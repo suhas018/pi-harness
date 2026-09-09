@@ -1,0 +1,10 @@
+id: sample-02
+goal: Add POST /echo endpoint that accepts JSON {message: string} and returns {echo: message}
+files:
+  - src/app.py
+  - tests/test_echo.py
+verifier:
+  - pytest -q tests/test_echo.py
+  - python -c "from fastapi.testclient import TestClient; from src.app import app; c=TestClient(app); assert c.post('/echo', json={'message':'hi'}).json()=={'echo':'hi'}"
+success: verifier exit 0
+notes: Tests POST body handling + JSON response. Reuses src/app.py — append, don't overwrite.
