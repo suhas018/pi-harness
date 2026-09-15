@@ -14,30 +14,45 @@ const RUNS_DIR = path.join(process.cwd(), "runs");
 function parseYamlSimple(text: string): any {
   // Minimal YAML parser for our task files (id, goal, files, verifier, notes)
   const lines = text.split("\n");
-  const out: any = { verifier: [] };
+  const out: any = { verifier: [], files: [] };
   let currentKey = "";
   let inList = false;
+  let listKey = "";
   for (const line of lines) {
     if (!line.trim() || line.trim().startsWith("#")) continue;
     const kv = line.match(/^(\w+):\s*(.*)$/);
     if (kv) {
-      currentKey = kv[1];
+      const key = kv[1];
       const val = kv[2].trim();
-      if (currentKey === "verifier") {
-        out.verifier = [];
-        inList = true;
-        if (val) out.verifier.push(val);
-      } else if (inList && currentKey !== "verifier") {
+      // If previous was list and new key starts, close list
+      if (inList && key !== listKey && val !== "") {
         inList = false;
+        listKey = "";
+      }
+      currentKey = key;
+      if (val === "") {
+        // Start of list (files: or verifier: on its own line)
+        out[currentKey] = out[currentKey] ?? [];
+        inList = true;
+        listKey = currentKey;
+      } else {
+        if (inList && currentKey !== listKey) {
+          inList = false;
+          listKey = "";
+        }
         out[currentKey] = val;
-      } else if (!inList) {
-        out[currentKey] = val;
+        // verifier with inline value not expected, but handle
+        if (currentKey === "verifier" && val) {
+          out.verifier = [val];
+          inList = true;
+          listKey = "verifier";
+        }
       }
       continue;
     }
     const item = line.match(/^\s+-\s+(.*)$/);
     if (item && inList) {
-      out[currentKey].push(item[1].trim());
+      out[listKey].push(item[1].trim());
     }
   }
   return out;
@@ -86,8 +101,20 @@ function main() {
         break;
       } else console.log(`  → ok`);
     }
+    // Inferential sensor: auto-run judge on FAIL (outside generation loop, Weng)
+    let judgeOut = "";
+    if (!ok) {
+      const target = task.files?.[0] ?? "src/app.py";
+      const isWin = process.platform === "win32";
+      const shell = isWin ? "powershell.exe" : "bash";
+      const cmd = `npx tsx sensors/judge.ts ${target}`;
+      const r = spawnSync(shell, isWin ? ["-Command", cmd] : ["-c", cmd], { encoding: "utf8", timeout: 35000 });
+      judgeOut = ((r.stdout ?? "") + (r.stderr ?? "")).slice(0, 2000);
+      console.log(`  [judge] ${judgeOut.slice(0, 300)}`);
+      logs.push(`\n[judge] ${judgeOut.slice(0, 1000)}`);
+    }
     if (ok) passed++;
-    results.push({ id, goal: task.goal, ok, logs });
+    results.push({ id, goal: task.goal, ok, logs, judge: judgeOut.slice(0, 500) });
   }
 
   const id = new Date().toISOString().slice(0, 10) + "-" + Math.random().toString(36).slice(2, 6);

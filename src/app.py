@@ -36,3 +36,8 @@ def get_item(item_id: int):
 def create_item(body: CreateItemIn):
     # simple id generation for demo — use hash of name
     return {"item_id": abs(hash(body.name)) % 10000, "name": body.name}
+
+
+@app.put("/items/{item_id}", response_model=ItemOut)
+def update_item(item_id: int, body: CreateItemIn):
+    return {"item_id": item_id, "name": body.name}

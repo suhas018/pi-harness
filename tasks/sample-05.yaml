@@ -1,0 +1,10 @@
+id: sample-05
+goal: Add PUT /items/{item_id} endpoint that accepts JSON {name: string} and returns {item_id, name} with response_model — update item
+files:
+  - src/app.py
+  - tests/test_update_item.py
+verifier:
+  - pytest -q tests/test_update_item.py
+  - python -c "from fastapi.testclient import TestClient; from src.app import app; c=TestClient(app); r=c.put('/items/5', json={'name':'updated'}); assert r.status_code==200 and r.json()=={'item_id':5,'name':'updated'}; assert c.put('/items/notanint', json={'name':'x'}).status_code==422"
+success: verifier exit 0
+notes: Tests PUT body + path validation, reuses ItemOut response_model, preserves all prior endpoints.
