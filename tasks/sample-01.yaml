@@ -4,7 +4,7 @@ files:
   - src/app.py
   - tests/test_health.py
 verifier:
-  - pytest -q
-  - curl -s http://localhost:8000/health | grep -q '"status": "ok"'
+  - pytest -q tests/test_health.py
+  - python -c "from fastapi.testclient import TestClient; from src.app import app; c=TestClient(app); assert c.get('/health').json()=={'status':'ok'}"
 success: verifier exit 0
 notes: Simple task to test harness loop + sensors + trajectory logging
