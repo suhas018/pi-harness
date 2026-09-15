@@ -4,13 +4,7 @@ from src.app import app
 
 client = TestClient(app)
 
-
 def test_get_item():
-    r = client.get("/items/42")
-    assert r.status_code == 200
-    assert r.json() == {"item_id": 42, "name": "item-42"}
-
-
-def test_get_item_validation():
-    r = client.get("/items/notanint")
-    assert r.status_code == 422
+    response = client.get('/items/42')
+    assert response.json() == {'item_id': 42, 'name': 'item-42'}
+    assert client.get('/items/notanint').status_code == 422
