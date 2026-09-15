@@ -1,7 +1,7 @@
 {
-  "name": "harness",
-  "version": "0.1.0",
-  "description": "Minimal pi outer harness — guides + sensors + file memory — for learning",
+  "name": "pi-harness",
+  "version": "1.0.0",
+  "description": "Minimal pi outer harness — bare-bones file-memory + sensors + eval (Fowler/Weng) — frozen v1.0",
   "type": "module",
   "private": true,
   "scripts": {

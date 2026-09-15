@@ -1,6 +1,6 @@
-# pi-harness — minimal pi outer harness (file-memory + sensors)
+# pi-harness — minimal pi outer harness (file-memory + sensors) — v1.0 bare-bones frozen
 
-Learn harness engineering by building the outer harness around `earendil-works/pi`.
+Learn harness engineering by building the outer harness around `earendil-works/pi`. **v1.0 bare-bones** — guides + sensors + file-memory + eval + self-improve, 4/4 tasks pass. No extras.
 
 **Inner:** `pi` (Read/Write/Edit/Bash + 60+ providers via `pi-ai`)
 **Outer:** your guides + sensors + file-memory that make the inner better.
