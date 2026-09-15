@@ -1,55 +1,62 @@
 /**
  * Minimal pi extension — outer harness hooks.
- * Pi loads extensions from this file (see pi docs: Extensions).
+ * Pi loads this via: pi --extension extensions/index.ts
  * Keep it tiny and file-backed for learning.
  */
-
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
-const RUNS_DIR = path.join(import.meta.dirname ?? ".", "../runs");
-const PLAYBOOK = path.join(import.meta.dirname ?? ".", "../memory/playbook.md");
+const PLAYBOOK = path.join(process.cwd(), "memory", "playbook.md");
+const RUNS_DIR = path.join(process.cwd(), "runs");
 
-// Called by pi when extension loads — register tool wrappers
-export function activate(pi: any) {
-  // Feedforward: inject playbook into context at session start
-  pi.on("session:start", async () => {
+export default function (pi: ExtensionAPI) {
+  // Feedforward: inject playbook at session start (if available, log it)
+  pi.on("session_start", async (_event, _ctx) => {
     if (fs.existsSync(PLAYBOOK)) {
-      const playbook = fs.readFileSync(PLAYBOOK, "utf8").slice(0, 4000);
-      pi.injectContext(`<playbook>\n${playbook}\n</playbook>`);
+      const playbook = fs.readFileSync(PLAYBOOK, "utf8").slice(0, 3000);
+      // For now just log — pi doesn't have injectContext in this API, so we use notification
+      // In interactive mode this shows; in print mode it's silent but proves hook ran
+      console.log(`[harness] playbook loaded (${playbook.length} chars)`);
     }
   });
 
-  // Feedback: after every Write, run computational sensor (tight — Fowler: sensor optimized for LLM)
-  pi.on("tool:write:after", async (evt: any) => {
-    const { spawnSync } = await import("node:child_process");
-    // Ensure ruff is found via uv fallback — pass enriched PATH
-    const res = spawnSync("npx", ["tsx", "sensors/computational.ts", evt.file ?? "."], {
-      encoding: "utf8",
-      timeout: 15000,
-      env: { ...process.env, PATH: process.env.PATH ?? "" },
-    });
-    const out = (res.stdout ?? "") + (res.stderr ?? "");
-    if (res.status !== 0) {
-      // feed sensor output back as LLM-consumable signal
-      pi.injectContext(`<sensor type="computational" file="${evt.file ?? ""}">\n${out.slice(0, 4000)}\nFix this before continuing (run ruff --fix if needed).\n</sensor>`);
-      // don't block — let LLM self-correct (steering loop)
-      return { block: false };
+  // Feedback: after every write/edit tool execution, run computational sensor
+  pi.on("tool_execution_end", async (event: any, _ctx) => {
+    const toolName = event.toolName ?? event.name ?? "";
+    const result = event.result ?? {};
+    // Only for write/edit
+    if (toolName !== "write" && toolName !== "edit") return;
+    const file = event.args?.path ?? event.params?.path ?? "unknown";
+    // Run ruff sensor (with uv fallback)
+    const target = file && file !== "unknown" ? file : ".";
+    let r = spawnSync("ruff", ["check", target, "--output-format", "concise"], { encoding: "utf8" });
+    if (r.error) {
+      r = spawnSync("uv", ["run", "--with", "ruff", "--", "ruff", "check", target, "--output-format", "concise"], { encoding: "utf8" });
     }
-    if (out.trim()) pi.injectContext(`<sensor type="computational" ok file="${evt.file ?? ""}">${out.slice(0, 1000)}</sensor>`);
+    const out = (r.stdout ?? "") + (r.stderr ?? "");
+    if (r.status !== 0 && out.trim()) {
+      console.log(`[harness sensor] FAIL for ${file}: ${out.slice(0, 500)}`);
+    } else if (out.trim()) {
+      console.log(`[harness sensor] ok for ${file}`);
+    }
   });
 
-  // After run, append to trajectory (file-system as memory — Weng Pattern 2)
-  // Also runs sensor/judge heuristic for quick feedback
-  pi.on("run:end", async (evt: any) => {
-    const id = new Date().toISOString().slice(0, 10) + "-" + Math.random().toString(36).slice(2, 6);
-    const dir = path.join(RUNS_DIR, id);
-    fs.mkdirSync(dir, { recursive: true });
-    const traj = { evt, at: new Date().toISOString(), playbook: fs.existsSync(PLAYBOOK) ? fs.readFileSync(PLAYBOOK, "utf8").slice(0, 2000) : "" };
-    fs.writeFileSync(path.join(dir, "trajectory.jsonl"), JSON.stringify(traj) + "\n");
-    // Fire-and-forget: log hint to run judge after (don't block)
-    pi.injectContext(`<hint>Run judge: npx tsx sensors/judge.ts ${dir} — then npm run sleep if FAIL repeats</hint>`);
+  // After session ends, append trajectory (file-system memory — Weng Pattern 2)
+  pi.on("session_shutdown", async (_event, ctx) => {
+    try {
+      const id = new Date().toISOString().slice(0, 10) + "-" + Math.random().toString(36).slice(2, 6);
+      const dir = path.join(RUNS_DIR, id);
+      fs.mkdirSync(dir, { recursive: true });
+      // Try to get last entries for trajectory
+      let entries: any[] = [];
+      try { entries = (ctx as any).sessionManager?.getEntries?.() ?? []; } catch {}
+      const traj = { at: new Date().toISOString(), entries: entries.slice(-5), playbookExists: fs.existsSync(PLAYBOOK) };
+      fs.writeFileSync(path.join(dir, "trajectory.jsonl"), JSON.stringify(traj) + "\n");
+      console.log(`[harness] trajectory logged to ${dir}/trajectory.jsonl`);
+    } catch (e) {
+      console.log(`[harness] trajectory log failed: ${e}`);
+    }
   });
 }
-
-export default { activate };
