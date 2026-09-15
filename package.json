@@ -7,6 +7,8 @@
   "scripts": {
     "check": "tsc --noEmit",
     "sleep": "tsx memory/sleep.ts",
+    "judge": "tsx sensors/judge.ts",
+    "sensor": "tsx sensors/computational.ts",
     "eval": "tsx sensors/run-eval.ts"
   },
   "dependencies": {
