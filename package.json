@@ -9,7 +9,8 @@
     "sleep": "tsx memory/sleep.ts",
     "judge": "tsx sensors/judge.ts",
     "sensor": "tsx sensors/computational.ts",
-    "eval": "tsx sensors/run-eval.ts"
+    "eval": "tsx sensors/run-eval.ts",
+    "improve": "tsx memory/self-improve.ts"
   },
   "dependencies": {
     "@earendil-works/pi-coding-agent": "0.85.1"
