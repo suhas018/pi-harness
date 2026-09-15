@@ -1,0 +1,10 @@
+id: sample-04
+goal: Add POST /items endpoint that accepts JSON {name: string} and returns {item_id: int, name: string} with 201 and response_model — test py-006
+files:
+  - src/app.py
+  - tests/test_create_item.py
+verifier:
+  - pytest -q tests/test_create_item.py
+  - python -c "from fastapi.testclient import TestClient; from src.app import app; c=TestClient(app); r=c.post('/items', json={'name':'foo'}); assert r.status_code==201 and r.json()['name']=='foo' and 'item_id' in r.json()"
+success: verifier exit 0
+notes: Tests py-006 (response_model/status_code) + preserves EchoIn/Item. Reuses src/app.py.
