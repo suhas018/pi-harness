@@ -12,10 +12,12 @@
     "eval": "tsx sensors/run-eval.ts",
     "improve": "tsx memory/self-improve.ts",
     "vector:reindex": "tsx memory/vector.ts reindex",
-    "vector:recall": "tsx memory/vector.ts recall"
+    "vector:recall": "tsx memory/vector.ts recall",
+    "hashline:compare": "tsx sensors/run-hashline-compare.ts"
   },
   "dependencies": {
     "@earendil-works/pi-coding-agent": "0.85.1",
+    "@oh-my-pi/hashline": "18.1.5",
     "fastembed": "2.1.0"
   },
   "devDependencies": {
