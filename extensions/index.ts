@@ -9,17 +9,63 @@ import { spawnSync } from "node:child_process";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const PLAYBOOK = path.join(process.cwd(), "memory", "playbook.md");
+const VECTORS = path.join(process.cwd(), "memory", "vectors.json");
 const RUNS_DIR = path.join(process.cwd(), "runs");
+
+function cosine(a: number[], b: number[]): number {
+  let dot = 0, na = 0, nb = 0;
+  for (let i = 0; i < a.length; i++) { dot += a[i]*b[i]; na += a[i]*a[i]; nb += b[i]*b[i]; }
+  return dot / (Math.sqrt(na) * Math.sqrt(nb) + 1e-9);
+}
+
+function recallTopK(query: string, k = 3): string[] {
+  // Synchronous vector recall — uses vectors.json if exists, else falls back to keyword on playbook.md
+  try {
+    if (fs.existsSync(VECTORS)) {
+      const entries: any[] = JSON.parse(fs.readFileSync(VECTORS, "utf8"));
+      if (entries[0]?.vector) {
+        // vectors exist but we don't have query vector without fastembed (async) — fallback to FTS for sync hook
+        // Do FTS here for speed; async fastembed recall is available via `npm run vector:recall`
+      }
+    }
+    // FTS fallback: keyword overlap on playbook bullets
+    if (!fs.existsSync(PLAYBOOK)) return [];
+    const lines = fs.readFileSync(PLAYBOOK, "utf8").split("\n").filter((l) => l.startsWith("- "));
+    const q = query.toLowerCase().split(/\W+/).filter((w) => w.length > 2);
+    const scored = lines.map((line) => {
+      const lower = line.toLowerCase();
+      const score = q.filter((w) => lower.includes(w)).length;
+      // boost if query mentions POST/PUT/items
+      let boost = 0;
+      if (query.toLowerCase().includes("post") && lower.includes("post")) boost += 2;
+      if (query.toLowerCase().includes("put") && lower.includes("put")) boost += 2;
+      if (query.toLowerCase().includes("pydantic") && lower.includes("pydantic")) boost += 2;
+      return { line, score: score + boost };
+    }).sort((a, b) => b.score - a.score);
+    // Return top-k with score >0, else top 2
+    const top = scored.filter((s) => s.score > 0).slice(0, k).map((s) => s.line);
+    return top.length > 0 ? top : scored.slice(0, 2).map((s) => s.line);
+  } catch { return []; }
+}
 
 export default function (pi: ExtensionAPI) {
   // Feedforward: inject playbook at session start (if available, log it)
   pi.on("session_start", async (_event, _ctx) => {
     if (fs.existsSync(PLAYBOOK)) {
       const playbook = fs.readFileSync(PLAYBOOK, "utf8").slice(0, 3000);
-      // For now just log — pi doesn't have injectContext in this API, so we use notification
-      // In interactive mode this shows; in print mode it's silent but proves hook ran
       console.log(`[harness] playbook loaded (${playbook.length} chars)`);
     }
+  });
+
+  // Vector recall: inject relevant playbook bullets before each agent turn (semantic, not whole file)
+  pi.on("before_agent_start", async (event: any, _ctx) => {
+    const prompt: string = event.prompt ?? event.text ?? "";
+    if (!prompt) return;
+    const top = recallTopK(prompt, 3);
+    if (top.length === 0) return;
+    const injected = `\n\n[playbook recall for: "${prompt.slice(0, 80)}"]\n${top.join("\n")}\n`;
+    // Return systemPrompt augmentation — pi chains these
+    return { systemPrompt: (event.systemPrompt ?? "") + injected };
   });
 
   // Feedback: after every write/edit tool execution, run computational sensor

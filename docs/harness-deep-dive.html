@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harness Engineering — What We Built, Why It Works, What's Next</title>
+<style>
+  :root { --bg:#fcfaf7; --fg:#1a1a1a; --muted:#6b6b6b; --accent:#d35400; --border:#e8e0d6; --code:#f4ece2; --card:#fff; --max:760px; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif; background:var(--bg); color:var(--fg); line-height:1.75; font-size:17px; }
+  header { max-width:var(--max); margin:0 auto; padding:56px 24px 24px; }
+  header .kicker { font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+  h1 { font-size:40px; line-height:1.15; margin:.4em 0 .2em; font-weight:800; letter-spacing:-.02em; }
+  .subtitle { color:var(--muted); font-size:18px; line-height:1.5; max-width:640px; }
+  .meta { margin-top:18px; font-size:14px; color:var(--muted); display:flex; gap:16px; flex-wrap:wrap; }
+  .meta span { display:inline-flex; align-items:center; gap:6px; }
+  .meta a { color:var(--muted); text-decoration:underline; text-underline-offset:3px; }
+  nav.toc { max-width:var(--max); margin:0 auto; padding:0 24px 24px; }
+  .toc-box { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px 20px; }
+  .toc-box h2 { font-size:14px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 10px; }
+  .toc ol { margin:0; padding-left:18px; }
+  .toc li { margin:6px 0; }
+  .toc a { color:var(--fg); text-decoration: none; border-bottom:1px solid var(--border); }
+  .toc a:hover { border-bottom-color: var(--accent); }
+  main { max-width:var(--max); margin:0 auto; padding:12px 24px 64px; }
+  section { margin:48px 0; }
+  h2 { font-size:28px; line-height:1.25; margin:0 0 12px; letter-spacing:-.015em; }
+  h3 { font-size:20px; margin:28px 0 10px; }
+  h4 { font-size:16px; margin:20px 0 8px; color:#2a2a2a; }
+  p { margin:12px 0; }
+  a { color:#b94e00; text-decoration: underline; text-underline-offset:3px; }
+  a:hover { color:var(--accent); }
+  .callout { background:var(--card); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:10px; padding:16px 18px; margin:18px 0; }
+  .callout.small { border-left-color:#bbb; font-size:15px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0; }
+  @media (max-width:700px){ .grid{ grid-template-columns:1fr; } h1{font-size:32px;} }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; }
+  .card h4 { margin:0 0 6px; }
+  .card p { margin:6px 0 0; font-size:15px; color:#2b2b2b; }
+  .label { display:inline-block; font-size:12px; letter-spacing:.08em; text-transform:uppercase; background:var(--code); border:1px solid var(--border); padding:2px 8px; border-radius:999px; margin-bottom:8px; }
+  figure { margin:18px 0; background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  figure pre { margin:0; padding:16px; overflow:auto; font-size:13px; line-height:1.6; background:#fffaf3; }
+  figure figcaption { padding:10px 14px; font-size:13px; color:var(--muted); border-top:1px solid var(--border); background:#fff; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size:.88em; background:var(--code); padding:1px 6px; border-radius:6px; }
+  pre code { background:none; padding:0; }
+  .cite { font-size:14px; color:var(--muted); }
+  .cite a { color:var(--muted); }
+  .ref-list { font-size:15px; }
+  .ref-list li { margin:8px 0; }
+  .badge { display:inline-block; font-size:12px; padding:3px 8px; border-radius:999px; background:#1a1a1a; color:#fff; margin-right:6px; }
+  .ver { font-size:13px; color:var(--muted); border-top:1px solid var(--border); padding-top:18px; margin-top:40px; }
+  hr { border:none; border-top:1px solid var(--border); margin:36px 0; }
+  .foot { font-size:14px; color:var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <div class="kicker">Harness Engineering · Bare-bones to v1.0</div>
+  <h1>Harness Engineering: What We Built, Why It Works, What's Next</h1>
+  <p class="subtitle">A readable field guide from building a minimal <code>pi</code> outer harness — file-memory, guides + sensors, eval + self-improve — with verified sources. What we have is bare-bones and intentional.</p>
+  <div class="meta">
+    <span>📦 <a href="https://github.com/suhas018/pi-harness">github.com/suhas018/pi-harness</a> · <code>v1.0</code> bare-bones frozen, <code>dev</code> 5/5</span>
+    <span>🕰 8–15 Sep 2026 · 4 tasks → 5 tasks</span>
+    <span>🔖 Guides + Sensors + Memory + Eval</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="toc-box">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#what-is-harness">What “harness” even means — verified definition</a></li>
+      <li><a href="#why-now">Why harness > model now</a></li>
+      <li><a href="#what-we-built">What we built (bare-bones, on purpose)</a></li>
+      <li><a href="#guides">Guides (feedforward)</a></li>
+      <li><a href="#sensors">Sensors (feedback) — computational vs inferential</a></li>
+      <li><a href="#memory">Memory as files — ACE, sleep, self-improve</a></li>
+      <li><a href="#eval">Eval harness — verifier outside the loop</a></li>
+      <li><a href="#live-loops">Live loops: 3 failures we actually hit</a></li>
+      <li><a href="#pi-omp">Why minimal <code>pi</code> for learning (vs OMP)</a></li>
+      <li><a href="#next">What's next — meta-harness for v1.1</a></li>
+      <li><a href="#further">Further reading — verified + Chinese blogs</a></li>
+    </ol>
+  </div>
+</nav>
+
+<main>
+  <section id="what-is-harness">
+    <h2>1. What “harness” even means — verified definition</h2>
+    <p>Two 2026 sources now converge. <strong>Birgitta Böckeler (Thoughtworks) on Martin Fowler's site</strong> defines the outer harness for coding-agent users as <em>everything around the model that shapes what it does</em> — split into <strong>Guides (feedforward)</strong> and <strong>Sensors (feedback)</strong>, each either <strong>computational (CPU, deterministic)</strong> or <strong>inferential (LLM, probabilistic)</strong> <span class="cite">[<a href="https://martinfowler.com/articles/harness-engineering.html">martinfowler.com — Harness engineering for coding agent users, 2 Apr 2026</a>]</span>. The harness is a <em>cybernetic governor</em> — a steering loop the human improves whenever the same failure repeats.</p>
+    <p><strong>Lilian Weng</strong> frames it for self-improvement: <code>Agent = Model + Harness</code> where the harness is <em>the system surrounding the base model that decides how it thinks, calls tools, manages context, stores artifacts, and evaluates</em>. The near-term path to recursive self-improvement is not the model rewriting its weights, but the harness becoming an optimization target <span class="cite">[<a href="https://lilianweng.github.io/posts/2026-07-04-harness/">lilianweng.github.io — Harness Engineering for Self-Improvement, 4 Jul 2026</a>]</span>.</p>
+    <div class="callout">
+      <strong>One sentence:</strong> The harness is the <em>platform layer</em> of the coding agent — tools, prompts, skills, hooks, memory, and feedback loops. The model is the reasoning; the harness decides what it can see and what happens after it acts. <span class="cite">See also <a href="https://harness-guide.com/">Harness Engineering Guide (open-source, bilingual EN/中文)</a> and <a href="https://github.com/androidZzT/harness-engineering-practice">harness-engineering-practice (EN/中文/한국어/日本語)</a></span>.
+    </div>
+    <p><strong>Regulation categories (Böckeler)</strong> — the harness regulates three dimensions, by increasing difficulty: maintainability (easiest today, linters exist), architecture fitness (fitness functions), and behaviour (the elephant — functional correctness). Our bare-bones sits in maintainability + behaviour via `pytest` <span class="cite">[martinfowler.com]</span>.</p>
+  </section>
+
+  <section id="why-now">
+    <h2>2. Why harness &gt; model now</h2>
+    <p>Weng's second point is blunt: with modern models, <em>harness engineering will evolve toward meta-methodology</em> — improving the machinery for getting answers, not just the answer. Once harness design is code, a strong coding agent can search that design space <span class="cite">[lilianweng.github.io]</span>.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="label">Evidence: tool format matters more than size</div>
+        <h4>Hashline 6.7% → 68.3%</h4>
+        <p>Same cheap model (Grok Code Fast 1), same prompt — changing only the edit format (Hashline line-anchored patches in <code>can1357/oh-my-pi</code>) ten-xed success on code-edit tasks <span class="cite">[<a href="https://blog.can.ac/2026/02/12/the-harness-problem/">blog.can.ac — The Harness Problem, 12 Feb 2026</a>; summarized on <a href="https://yuv.ai/blog/oh-my-pi-omp-explained">yuv.ai</a>]</span>. Harness &gt; model.</p>
+      </div>
+      <div class="card">
+        <div class="label">Evidence: harness shifts completion</div>
+        <h4>AHE: observability-driven evolution</h4>
+        <p>Holding the base model fixed, harness edits materially shift long-horizon completion. AHE's three observability pillars (component / trajectory / decision) turn each edit into a falsifiable file-level contract <span class="cite">[<a href="https://arxiv.org/abs/2604.25850">arxiv.org — Agentic Harness Engineering, Lin et al., Apr 2026</a>]</span>.</p>
+      </div>
+    </div>
+    <p>OpenAI's Codex retrospective makes the same claim: the breakthrough was not the model but the harness — sandboxed tools, verification loops <span class="cite">[<a href="https://harness-engineering.ai/blog/page/17">Harness Engineering — What Is Harness (citing OpenAI)</a>]</span>. Ryan Lopopolo (LangChain) puts it as <em>All the harness should do is surface instructions at the right time</em> <span class="cite">[<a href="https://gist.github.com/intellectronica/1a9018ed642096fc81b0eeb1f2c8b63c">gist — Harness Engineering summary (AI Engineer talk)</a>]</span>.</p>
+  </section>
+
+  <section id="what-we-built">
+    <h2>3. What we built (bare-bones, on purpose)</h2>
+    <p>We chose <strong>minimal <a href="https://github.com/earendil-works/pi"><code>earendil-works/pi</code> (4 tools: Read/Write/Edit/Bash)</a></strong> over the feature-rich fork <code>can1357/oh-my-pi</code> (31 tools, LSP+DAP, Rust core) precisely because bare-bones teaches. OMP is the comparison in Week 5, not the base.</p>
+    <figure>
+      <pre><code>Guides (feedforward) ──┐
+                      ▼
+              pi Agent Loop ──► Sensors ──┐
+                      │        (ruff + qwen judge) │
+                      ▼                              │
+           runs/&lt;id&gt;/trajectory.jsonl            │
+           memory/playbook.md ◄── Curator ◄───────────┘
+                      │
+                eval (held-in/out, outside loop)</code></pre>
+      <figcaption>Outer harness around inner <code>pi</code> loop — file-system is the source of truth (Weng Pattern 2).</figcaption>
+    </figure>
+    <div class="grid">
+      <div class="card">
+        <h4>Repo <span class="badge">v1.0 frozen</span> <span class="badge">dev 5/5</span></h4>
+        <p><code>AGENTS.md:1</code> + <code>skills/python-conventions/SKILL.md</code> + <code>skills/review-sensor/SKILL.md</code> (guides)<br>
+        <code>extensions/index.ts:1</code> (<code>session_start</code> playbook, <code>tool_execution_end</code> ruff, <code>session_shutdown</code> trajectory)<br>
+        <code>sensors/computational.ts:1</code> (ruff via <code>uv</code> fallback) + <code>sensors/judge.ts:1</code> (qwen2.5-coder:7b)<br>
+        <code>memory/playbook.md:1</code> (private, 8 bullets) + <code>memory/sleep.ts:1</code> + <code>memory/self-improve.ts:1</code><br>
+        <code>tasks/sample-0{1-5}.yaml:1</code> + <code>sensors/run-eval.ts:1</code> (3/3 → 5/5)<br>
+        <code>src/app.py:1</code> (health/echo/items) + <code>tests/test_*.py</code></p>
+      </div>
+      <div class="card">
+        <h4>Bare-bones on purpose</h4>
+        <p>No vector DB, no Harbor, no dashboard yet. File-memory + deterministic verifier + one inferential judge — enough to demonstrate the steering loop and to interview-explain every file line. <code>PLAN.md</code> is private; <code>playbook.example.md</code> is the public template.</p>
+      </div>
+    </div>
+    <p><strong>Why bare-bones is a feature:</strong> Böckeler warns legacy codebases are hardest to harness where harness is most needed (harnessability) <span class="cite">[martinfowler.com]</span>. A minimal repo lets us bake harnessability in from day one — strongly typed, clear module boundaries — and then add harness templates later.</p>
+  </section>
+
+  <section id="guides">
+    <h2>4. Guides (feedforward) — increase P(success first try)</h2>
+    <p>Guides anticipate unwanted outputs. In our repo they are <strong>inferential</strong> (the model must interpret) and versioned:</p>
+    <ul>
+      <li><code>AGENTS.md:1</code> — project conventions (write plans to <code>memory/short.json</code>, every Write → <code>sensors/computational.ts</code>, every run → <code>runs/&lt;id&gt;/trajectory.jsonl</code>)</li>
+      <li><code>skills/python-conventions/SKILL.md:1</code> — FastAPI + Pydantic v2, <code>src/</code> layout, <code>tests/test_*.py</code></li>
+      <li><code>skills/review-sensor/SKILL.md:1</code> — now documents both sensors and auto-run (see next section)</li>
+      <li><code>memory/playbook.md:1</code> — ACE-style bullets <code>id: description | source | date</code> (e.g. <code>py-004: Use Pydantic BaseModel for POST JSON body — pi failed sample-02 with Field required | sample-02:q2c8</code>)</li>
+    </ul>
+    <div class="callout small">
+      <strong>Verified pattern:</strong> Böckeler's feedforward examples include <code>AGENTS.md</code>, Skills, bootstrap scripts, and LSP context as computational guides <span class="cite">[martinfowler.com]</span>. The <a href="https://arxiv.org/pdf/2602.14690v5">AIware '26 study (Harness Engineering for Agentic AI Coding Tools)</a> found 17.3% of repos now use tool-agnostic <code>AGENTS.md</code> and that harness engineering today is mostly context engineering — static files over executable hooks <span class="cite">[arxiv 2602.14690]</span>.
+    </div>
+    <p><strong>Computational guide we use:</strong> LSP is not yet wired, but <code>uv run --with ruff</code> is the fast deterministic guide the extension invokes after each Write. It is cheap enough to run every loop <span class="cite">[martinfowler.com]</span>.</p>
+  </section>
+
+  <section id="sensors">
+    <h2>5. Sensors (feedback) — computational vs inferential</h2>
+    <p>Sensors observe after the agent acts and let it self-correct before human review. The cheapest signal that actually optimizes for LLM consumption wins (Böckeler: <em>custom linter messages that include instructions for self-correction — a positive kind of prompt injection</em>).</p>
+    <div class="grid">
+      <div class="card">
+        <div class="label">Computational — CPU, cheap, every Write</div>
+        <h4><code>sensors/computational.ts:1</code> → ruff</h4>
+        <p>Deterministic, 50ms–1s. Tries <code>ruff check</code> then <code>uv run --with ruff</code> fallback (fixes broken <code>py</code> launcher on Windows). Injected as <code>&lt;sensor type="computational"&gt;Fix this before continuing&lt;/sensor&gt;</code>. Catches <code>I001/F401/F821</code> reliably.</p>
+        <p class="cite">Böckeler: computational sensors catch structural stuff reliably — style, boundaries, coverage <span class="cite">[martinfowler.com]</span>.</p>
+      </div>
+      <div class="card">
+        <div class="label">Inferential — LLM, expensive, after task</div>
+        <h4><code>sensors/judge.ts:1</code> → qwen2.5-coder:7b</h4>
+        <p>Semantic, ~10s, via Ollama <code>http://localhost:11434/v1</code>. Prompt checks duplicate/over-engineer/missing tests. Falls back to heuristic (dup-line + length) if Ollama down. Output is <code>PASS/FAIL + fix hint</code> sized for LLM.</p>
+        <p class="cite">Böckeler: inferential sensors increase trust with strong models but are probabilistic <span class="cite">[martinfowler.com]</span>; Weng: they are slower/more non-deterministic, keep them outside the inner loop.</p>
+      </div>
+    </div>
+    <p><strong>Where they run (keep quality left):</strong> computational after every Write via <code>extensions/index.ts:24</code> (<code>tool_execution_end</code>), inferential after task via <code>npm run judge -- &lt;file|runs/&lt;id&gt;&gt;</code> and auto via <code>sensors/run-eval.ts:1</code> on any FAIL (see <a href="https://www.thoughtworks.com/en-us/insights/blog/generative-ai/harness-engineering-agent-feedback-exploring-ai-coding-sensors">Thoughtworks Sensors deep-dive (May 2026)</a> for the TypeScript dashboard experiment with ESLint/Semgrep/DepCruiser/mutation testing).</p>
+    <p><strong>Auto-run as skill:</strong> <code>skills/review-sensor/SKILL.md:1</code> now documents both sensors and that <code>run-eval.ts</code> auto-calls <code>judge.ts</code> on FAIL — no reward hacking, verifier stays outside the generation loop <span class="cite">[Weng]</span>.</p>
+    <figure>
+      <pre><code>[harness sensor] FAIL for unknown: tests/test_echo.py:1:1: I001 ... F401 `pytest` imported but unused
+# → injected to LLM, pi re-tries
+[judge] calling qwen2.5-coder:7b ...
+[judge] PASS: clean, concise...  # 12.6s on src/app.py, FAIL on dup sample (2.3s)
+[eval] 5/5 passed — report at runs/eval-.../report.md</code></pre>
+      <figcaption>Real outputs from our harness — computational catches style, judge catches semantics, eval scores.</figcaption>
+    </figure>
+  </section>
+
+  <section id="memory">
+    <h2>6. Memory as files — ACE, sleep, self-improve</h2>
+    <p>Weng's second recurring pattern: <strong>file system as persistent memory</strong>. Don't shove trajectories into context; keep durable state in files. LLMs already know <code>bash/read/edit</code>, so file-memory benefits from core capability gains <span class="cite">[lilianweng.github.io]</span>.</p>
+    <div class="callout">
+      <strong>Our implementation:</strong> <code>runs/&lt;id&gt;/trajectory.jsonl:1</code> (episodic, one JSON per run, includes playbook snippet) + <code>memory/playbook.md:1</code> (semantic, ACE bullets) + <code>memory/short.json:1</code> (working memory). Files are gitignored; <code>playbook.example.md</code> is the public template. The evaluator and permission control live outside the loop that evolves the harness (Weng's Future Challenge 5).
+    </div>
+    <h3>ACE → MCE → Meta-Harness lineage</h3>
+    <p><strong>ACE (Zhang et al., ICLR 2026)</strong> treats context as an evolving playbook with Generator/Reflector/Curator that merges itemized bullets deterministically, not blob rewrites <span class="cite">[Weng § Context Engineering]</span>. That's exactly <code>memory/sleep.ts:1</code>.</p>
+    <p><strong>MCE (Ye et al., 2026)</strong> separates mechanism (<code>F_s</code> dynamic operators) from artifact content (<code>ρ_s</code> static prompts) and evolves free-form skills via bi-level optimization <span class="cite">[Weng]</span>.</p>
+    <p><strong>Meta-Harness (Lee et al., 2026)</strong> optimizes the code that decides what to store/retrieve/present — a harness for harnesses, kept on the Pareto frontier <span class="cite">[Weng]</span>.</p>
+    <figure>
+      <pre><code>// memory/sleep.ts — Reflector → Curator (ACE-lite)
+// 1. list runs/  2. read trajectory.jsonl  3. cluster by task  4. append one bullet if missing
+if (sample01.some(t =&gt; t.verifier.includes("passed"))) {
+  if (!hasBullet("py-003")) appendBullet("py-003", "Use TestClient...", "sample-01:1c682bc");
+}
+// idempotent: second run → "already exists"</code></pre>
+      <figcaption><code>sleep.ts</code> is ACE: deterministic merge, not LLM rewrite. <code>self-improve.ts</code> is Self-Harness: propose → held-in/out eval → keep or revert.</figcaption>
+    </figure>
+    <h3>Self-improving harness on our repo</h3>
+    <p><code>memory/self-improve.ts:1</code> implements the <strong>propose-evaluate-accept loop</strong> from <a href="https://arxiv.org/abs/2606.09498">Self-Harness (Zhang et al., 2026)</a>: weakness mining (trajectory notes + eval reports), bounded proposal (one bullet), validation on held-in (<code>sample-01,02</code>) + held-out (<code>sample-03</code>) via <code>sensors/run-eval.ts:1</code>, revert on regression. First run proposed <code>py-006: response_model/status_code</code> → validated <code>3/3 → kept</code>, second run → <code>no new weakness — idempotent</code>. This mirrors the paper's constraint that qualified edits must have no regression on both splits.</p>
+    <p class="cite">Weng's caution: STOP improved with GPT-4 but degraded with GPT-3.5 — base model must be capable enough to improve the mechanism; harness-benefit is non-monotonic, middle-tier models benefit most <span class="cite">[lilianweng.github.io — citing Zelikman et al. STOP & Lin et al.]</span>. We see this with <code>llama3.1:8b</code> (printed JSON, no tool call) vs <code>qwen2.5-coder:7b</code> (10s judge PASS) vs <code>openrouter/gpt-4o-mini</code> ($0.00022 toolUse success).</p>
+  </section>
+
+  <section id="eval">
+    <h2>7. Eval harness — verifier outside the loop</h2>
+    <p>Behaviour harness is the elephant: how do we know the app functionally behaves? Böckeler's current best practice is a spec + AI-generated tests with human review — not enough trust alone <span class="cite">[martinfowler.com]</span>. Our answer is minimal and Windows-friendly: <code>tasks/*.yaml</code> with a deterministic verifier per task.</p>
+    <figure>
+      <pre><code># tasks/sample-01.yaml
+id: sample-01
+goal: Add GET /health endpoint → {status: "ok"}
+files: [src/app.py, tests/test_health.py]
+verifier:
+  - pytest -q tests/test_health.py
+  - python -c "from fastapi.testclient import TestClient; from src.app import app; assert TestClient(app).get('/health').json()=={'status':'ok'}"
+# → sensors/run-eval.ts runs each via uv, writes runs/eval-&lt;id&gt;/report.md</code></pre>
+      <figcaption>Each task is a spec + verifier. The runner keeps the verifier outside the generation loop — no reward hacking.</figcaption>
+    </figure>
+    <p><code>sensors/run-eval.ts:1</code> parses YAML (custom, no dep), normalizes <code>python → uv run</code> and <code>pytest → python -m pytest</code> (so <code>src/</code> is found), runs via <code>powershell.exe -Command</code> / <code>bash -c</code>, auto-calls <code>judge.ts</code> on FAIL, and writes <code>runs/eval-&lt;id&gt;/report.md + report.json</code> with <code>Score: 5/5</code>. Early run with <code>curl | grep</code> failed on Windows (no <code>grep</code>, no live server); we switched to <code>TestClient</code> — a portability lesson.</p>
+    <p class="cite">Weng's Future Challenge 1 is exactly this: weak/fuzzy evaluators for research taste vs measurable verifiers. For code, fast precise verifiers exist; for taste, not yet <span class="cite">[lilianweng.github.io]</span>.</p>
+  </section>
+
+  <section id="live-loops">
+    <h2>8. Live loops: 3 failures we actually hit (and what they taught)</h2>
+    <div class="card" style="margin:12px 0;">
+      <h4>1. Sample-02: POST body as query param <span class="badge">Field required</span></h4>
+      <p><code>pi --provider openrouter/gpt-4o-mini</code> wrote <code>async def echo(message: str)</code> → <code>pytest</code> FAIL <code>Field required @ query.message</code>. Computational sensor had already flagged <code>I001/F401</code> x4. Fix: Pydantic <code>class EchoIn(BaseModel): message: str</code> + <code>def echo(body: EchoIn)</code> → <code>4 passed</code>. New bullet <code>py-004</code>.</p>
+    </div>
+    <div class="card" style="margin:12px 0;">
+      <h4>2. Sample-03: mangled Item model <span class="badge">F821</span></h4>
+      <p>Pi overwrote <code>src/app.py</code> with <code>class Item: message: str</code> stray and lost <code>EchoIn</code> → <code>F821 Undefined name EchoIn</code> + <code>pytest NameError</code> (0 collected). Fix: restore + <code>ruff --fix</code> → <code>3 passed</code>. New bullet <code>py-005: preserve existing models</code>.</p>
+    </div>
+    <div class="card" style="margin:12px 0;">
+      <h4>3. Ollama tool calling <span class="badge">24% → 100% pull, still no toolUse</span></h4>
+      <p>Local <code>llama3.1:8b</code> and <code>qwen2.5-coder:7b</code> via <code>ollama http://localhost:11434/v1</code> + <code>openai-completions</code> printed <code>{"name":"write"...}</code> as text, not <code>toolUse</code> — no file created. <code>openrouter/gpt-4o-mini</code> with same prompt did <code>toolUse</code> correctly ($0.00022). Lesson: harness-benefit depends on model; local judge still works (qwen 12.6s PASS) even when local actor doesn't.</p>
+    </div>
+    <p>Each failure was logged to <code>runs/&lt;id&gt;/trajectory.jsonl</code>, then promoted to a playbook bullet via <code>sleep</code>/<code>self-improve</code> — the steering loop Böckeler describes: <em>whenever an issue happens multiple times, improve the harness so it becomes less probable</em>.</p>
+  </section>
+
+  <section id="pi-omp">
+    <h2>9. Why minimal <code>pi</code> for learning (vs OMP)</h2>
+    <p><code>earendil-works/pi</code> is the monorepo at <a href="https://github.com/earendil-works/pi">github.com/earendil-works/pi</a> (also <code>pi.dev</code>): <code>@earendil-works/pi-ai</code> (unified LLM), <code>@earendil-works/pi-agent-core</code> (loop), <code>@earendil-works/pi-coding-agent</code> (CLI/TUI). It ships <strong>4 tools</strong> and intentionally skips sub-agents/plan/todos — <em>write plans to files, use tmux</em> <span class="cite">[<a href="https://github.com/earendil-works/pi">README</a>]</span>. Extensions add capabilities via <code>export default function(pi: ExtensionAPI) { pi.on("session_start", ...); pi.on("tool_execution_end", ...) }</code> <span class="cite">[<a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md">extensions.md</a>, <a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/providers.md">providers.md</a> (Ollama <code>baseUrl http://localhost:11434/v1</code> + <code>compat.supportsDeveloperRole</code>), <a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md">models.md</a>]</span>.</p>
+    <p><code>can1357/oh-my-pi</code> (OMP) is the batteries-included fork (31 tools, 14 LSP ops, 28 DAP ops, ~80k Rust, Hashline) — the right comparison for Week 5, not the base. Choosing minimal pi let us own every guide/sensor/memory decision and explain it line-by-line — exactly what makes harnessability intentional for greenfield vs hard for legacy <span class="cite">[martinfowler.com — Harnessability & Ambient affordances]</span>.</p>
+  </section>
+
+  <section id="next">
+    <h2>10. What's next — meta-harness for v1.1</h2>
+    <p><code>v1.0</code> is frozen 4/4 (now 5/5 on <code>dev</code>). <code>v1.1</code> is the step from toy tasks to production evals: <strong><code>pi-metaharness</code></strong> (<code>@oh-my-pi/pi-metaharness</code> in <a href="https://github.com/can1357/oh-my-pi/tree/main/packages/metaharness">can1357/oh-my-pi/packages/metaharness</a>) — one manager for Harbor, TypeScript-edit, and SnapCompact with <code>experiment → run → trace</code>, SQLite <code>metaharness.sqlite</code>, REST <code>:4700</code> + SSE, and <code>trace-report.ts</code> narratives <span class="cite">[metaharness README]</span>.</p>
+    <ul>
+      <li><strong>Start with <code>edit</code> benchmark</strong> (TypeScript mutations, cheap, local) to quantify Hashline — no Docker/KVM needed.</li>
+      <li><strong>Then Harbor</strong> <code>terminal-bench@2.0</code> subset (20 tasks) via Docker on WSL — our machine has WSL+Docker; public registries only, <code>models.yml</code> via host gateway so keys never enter containers <span class="cite">[metaharness README — How Harbor runs execute]</span>.</li>
+    </ul>
+    <p>Design stays the same: proposer is itself a coding agent, harness candidates live on the Pareto frontier, history stays file-system (grep/cat), permission control lives outside the loop that evolves the harness <span class="cite">[Weng — Meta-Harness outer loop]</span>. We'll keep the evaluator verifier-independent and trace-audited — the same anti-reward-hacking discipline as <code>run-eval.ts</code>.</p>
+    <div class="callout small">
+      <strong>Open questions we carry:</strong> When sensors never fire, is that high quality or inadequate detection? How far can we trust agents when guides and sensors contradict? How to keep the harness coherent as it grows? <span class="cite">[martinfowler.com — A starting point]</span> + Weng's 7 Future Challenges: fuzzy evaluators, memory lifecycle, negative results, diversity collapse, reward hacking, long-term repo health, human oversight <span class="cite">[lilianweng.github.io]</span>.
+    </div>
+  </section>
+
+  <section id="further">
+    <h2>Further reading — verified + Chinese blogs</h2>
+    <p>All claims above are grounded in these sources. For Chinese platforms, Juejin (掘金) is the richest current corpus for harness engineering.</p>
+    <h3>Verified core</h3>
+    <ul class="ref-list">
+      <li><strong>Böckeler, Thoughtworks / Martin Fowler</strong> — <a href="https://martinfowler.com/articles/harness-engineering.html">Harness engineering for coding agent users (2 Apr 2026)</a> — guides/sensors, computational/inferential, harnessability, templates</li>
+      <li><strong>Böckeler & Ford, Thoughtworks</strong> — <a href="https://www.thoughtworks.com/en-us/insights/blog/generative-ai/harness-engineering-agent-feedback-exploring-ai-coding-sensors">Harness engineering and agent feedback: Exploring AI coding sensors (13 May 2026)</a> — video + TypeScript dashboard experiment</li>
+      <li><strong>Weng, Lilian (Lil'Log)</strong> — <a href="https://lilianweng.github.io/posts/2026-07-04-harness/">Harness Engineering for Self-Improvement (4 Jul 2026)</a> — workflow/file-memory/sub-agents, ACE/MCE/Meta-Harness, STOP, Self-Harness, AlphaEvolve/DGM</li>
+      <li><strong>Lin et al., Fudan et al.</strong> — <a href="https://arxiv.org/abs/2604.25850">Agentic Harness Engineering (AHE) — Observability-Driven Evolution (Apr 2026)</a> — component/trajectory/decision observability</li>
+      <li><strong>pi docs</strong> — <a href="https://github.com/earendil-works/pi">pi monorepo</a>, <a href="https://pi.dev">pi.dev</a>, <a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md">extensions.md</a>, <a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/providers.md">providers.md</a>, <a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md">models.md</a>, <a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/llama-cpp.md">llama-cpp.md</a></li>
+      <li><strong>OMP</strong> — <a href="https://github.com/can1357/oh-my-pi">can1357/oh-my-pi</a>, <a href="https://github.com/can1357/oh-my-pi/tree/main/packages/metaharness">metaharness</a>, <a href="https://blog.can.ac/2026/02/12/the-harness-problem/">The Harness Problem</a></li>
+    </ul>
+    <h3>Practice guides (English)</h3>
+    <ul class="ref-list">
+      <li><a href="https://harness-guide.com/">Harness Engineering Guide — open-source knowledge base (EN/中文)</a> — agentic loop, tool system, memory, guardrails</li>
+      <li><a href="https://github.com/androidZzT/harness-engineering-practice">harness-engineering-practice (EN/한국어/日本語/中文)</a> — Claude Code vs Codex: skills/hooks/config</li>
+      <li><a href="https://arxiv.org/pdf/2602.14690v5">AIware '26 — Harness Engineering for Agentic AI Coding Tools: An Exploratory Study</a> — 2,853 repos, 8 mechanisms, 5 tools</li>
+    </ul>
+    <h3>Chinese blogs (Juejin 掘金 + others)</h3>
+    <ul class="ref-list">
+      <li><a href="https://juejin.cn/post/7673905580617498664">掘金 — DeepSeek Harness 刚发布，先让它做了个网页 (14 Aug 2026)</a> — <code>Model + Harness = Agent</code>, Everything is a Plugin,轨迹</li>
+      <li><a href="https://juejin.cn/post/7644886019176251407">掘金 — Pi 是什么：极简、能自己长大 的 AI 编程 Agent (29 May 2026)</a> — 极简内核 + 自我扩展</li>
+      <li><a href="https://juejin.cn/post/7669124488463450127">掘金 — Agent Harness 工程方法论：AI 编程的核心不是模型 (3 Aug 2026)</a></li>
+      <li><a href="https://juejin.cn/post/7622335799020355590">掘金 — 2026 Agent落地必看！4种主流Agent Harness架构解析</a></li>
+      <li><a href="https://juejin.cn/post/7673390412729155638">掘金 — DeepSeek Harness 架构研究与上手指南</a> — Cordis / Profile & Bundle / Turn 流程</li>
+      <li>Further on Juejin: search <code>Agent Harness</code> or <code>DeepSeek Harness</code> — 10+ 2026 posts on Loop vs Graph vs Harness, DSH plugins, Kimi/Qwen Code differences — all under <code>juejin.cn/post/…</code></li>
+    </ul>
+    <p class="cite">Chinese platforms beyond Juejin where harness discourse is growing: <code>cnblogs.com</code>, <code>zhihu.com</code>, <code>51cto.com</code>, <code>learnku.com</code> — search “Harness 工程” or “Agent Harness”. For this doc we verified Juejin posts directly; treat machine-translated excerpts as secondary and prefer the English verified sources above for citations.</p>
+  </section>
+
+  <section class="ver">
+    <p><strong>How this doc was built:</strong> Every claim links to a verified source fetched during the build (Fowler/Weng/pi docs/metaharness README/arXiv/Juejin). File refs like <code>src/app.py:1</code> point to this repo (<code>pi-harness</code> <code>main</code> at <code>v1.0</code>, <code>dev</code> at <code>fdd83d7</code>). Private files (<code>PLAN.md</code>, <code>memory/playbook.md</code>) are local-only; this HTML is public in <code>docs/</code>.</p>
+    <p>Build: <code>npx tsc --noEmit</code> + <code>uv run pytest</code> + <code>npx tsx sensors/run-eval.ts</code> → <code>5/5</code> on <code>dev</code>. Learnings → <code>memory/playbook.md</code> (8 bullets). Next: <code>pi-metaharness</code> edit benchmark for <code>v1.1</code>.</p>
+  </section>
+</main>
+
+<footer style="max-width:760px; margin:0 auto; padding:0 24px 48px; color:#6b6b6b; font-size:14px;">
+  <hr>
+  <p>© pi-harness — bare-bones, file-backed, steering loop. Built on <code>earendil-works/pi</code> · <a href="https://github.com/suhas018/pi-harness">GitHub</a></p>
+</footer>
+</body>
+</html>

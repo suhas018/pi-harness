@@ -8,6 +8,8 @@ dist/
 PLAN.md
 memory/short.json
 memory/playbook.md
+memory/vectors.json
+memory/.cache/
 runs/*/
 !runs/README.md
 
