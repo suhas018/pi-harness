@@ -1,7 +1,7 @@
 {
   "name": "pi-harness",
-  "version": "1.0.0",
-  "description": "Minimal pi outer harness — bare-bones file-memory + sensors + eval (Fowler/Weng) — frozen v1.0",
+  "version": "1.1.0",
+  "description": "Minimal pi outer harness — v1.1 with edit benchmark + Harbor subset 20 + 5/5 eval + vector + meta-harness",
   "type": "module",
   "private": true,
   "scripts": {
@@ -13,7 +13,9 @@
     "improve": "tsx memory/self-improve.ts",
     "vector:reindex": "tsx memory/vector.ts reindex",
     "vector:recall": "tsx memory/vector.ts recall",
-    "hashline:compare": "tsx sensors/run-hashline-compare.ts"
+    "hashline:compare": "tsx sensors/run-hashline-compare.ts",
+    "edit:benchmark": "tsx sensors/run-edit-benchmark.ts",
+    "harbor:subset": "tsx sensors/run-harbor-subset.ts"
   },
   "dependencies": {
     "@earendil-works/pi-coding-agent": "0.85.1",

@@ -1,6 +1,8 @@
-# pi-harness — minimal pi outer harness (file-memory + sensors) — v1.0 bare-bones frozen
+# pi-harness — minimal pi outer harness (file-memory + sensors) — v1.1
 
-Learn harness engineering by building the outer harness around `earendil-works/pi`. **v1.0 bare-bones** — guides + sensors + file-memory + eval + self-improve, 4/4 tasks pass. No extras.
+![eval](https://img.shields.io/badge/eval-5%2F5-brightgreen) ![sensors](https://img.shields.io/badge/sensors-ruff%20%2B%20qwen-blue) ![memory](https://img.shields.io/badge/memory-file%20%2B%20vector-orange)
+
+Learn harness engineering by building the outer harness around `earendil-works/pi`. **v1.1** — guides + sensors + file-memory + vector recall + eval + self-improve + meta-harness (edit + Harbor), **5/5** tasks pass. `v1.0` bare-bones frozen at `4/4`.
 
 **Inner:** `pi` (Read/Write/Edit/Bash + 60+ providers via `pi-ai`)
 **Outer:** your guides + sensors + file-memory that make the inner better.
@@ -41,8 +43,11 @@ npm run sleep                         # Reflector → Curator → memory/playboo
 - `sensors/judge.ts:1` — slow inferential (qwen2.5-coder:7b via `http://localhost:11434/v1`, fallback heuristic)
 - `memory/playbook.md` — private ACE bullets `id: description | source | date` (see `playbook.example.md`)
 - `memory/sleep.ts:1` — Reflector → Curator (idempotent, 3 runs logged)
-- `tasks/sample-0{1,2,3}.yaml:1` — evals (verifier outside loop, no reward hacking)
-- `src/app.py:1` + `tests/test_*.py:1` — sample app (health/echo/items, 4 tests pass via `uv run pytest`)
+- `tasks/sample-0{1,2,3,4,5}.yaml:1` — evals (verifier outside loop, no reward hacking, 5/5)
+- `src/app.py:1` + `tests/test_*.py:1` — sample app (health/echo/items + create/update, 6 tests pass via `uv run pytest`)
+- `memory/vector.ts:1` — vector recall (fastembed BGE-small 384d) + `extensions/index.ts:1` vector `before_agent_start`
+- `sensors/run-hashline-compare.ts:1` + `docs/hashline-compare.md:1` — meta-harness edit benchmark (20 trials, 9.1% token saving, 35%→65%)
+- `sensors/run-harbor-subset.ts:1` — Harbor subset 20-task runner via Docker on WSL (`:4700` dashboard when Docker available)
 
 ## Demo (proven)
 
@@ -66,7 +71,8 @@ npx tsx memory/sleep.ts
 # [curator] added py-003: Use TestClient...
 ```
 
-See `PLAN.md` (private) for 4-6 week plan. Private state is gitignored: `PLAN.md`, `memory/playbook.md`, `memory/short.json`, `runs/*/`, `.env`.
+See `PLAN.md` (private) for 4-6 week plan. Private state is gitignored: `PLAN.md`, `memory/playbook.md`, `memory/vectors.json`, `runs/*/`, `.env`.
+Docs: `docs/harness-deep-dive.html` (10 sections, verified) + `docs/topics-and-blogs.md` (9 topics) + `docs/hashline-compare.md` (edit benchmark).
 
 ## Why minimal pi?
 
