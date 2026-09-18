@@ -49,11 +49,30 @@ function recallTopK(query: string, k = 3): string[] {
 }
 
 export default function (pi: ExtensionAPI) {
-  // Feedforward: inject playbook at session start (if available, log it)
+  // Gate 1: input handler for on-demand skills via $ (Chasen: rules resident, capabilities on-demand)
+  pi.on("input", async (event: any, _ctx) => {
+    const text: string = event.text ?? "";
+    if (!text.trim().startsWith("$")) return;
+    const match = text.trim().match(/^\$([a-z0-9_-]+)\b(.*)/i);
+    if (!match) return;
+    const skill = match[1];
+    const rest = (match[2] ?? "").trim();
+    const skillPath = path.join(process.cwd(), "skills", skill, "SKILL.md");
+    if (!fs.existsSync(skillPath)) {
+      console.log(`[harness] $ skill not found: ${skill}`);
+      return { action: "handled" as const };
+    }
+    const content = fs.readFileSync(skillPath, "utf8").slice(0, 4000);
+    const transformed = `[Skill: ${skill}]\n${content}\n\n[User request]\n${rest || "(no extra prompt)"}`;
+    console.log(`[harness] $ loaded skill ${skill} (${content.length} chars)`);
+    return { action: "transform" as const, text: transformed };
+  });
+
+  // Feedforward: inject playbook at session start (thin — only log length, not full content, Gate 1)
   pi.on("session_start", async (_event, _ctx) => {
     if (fs.existsSync(PLAYBOOK)) {
-      const playbook = fs.readFileSync(PLAYBOOK, "utf8").slice(0, 3000);
-      console.log(`[harness] playbook loaded (${playbook.length} chars)`);
+      const playbook = fs.readFileSync(PLAYBOOK, "utf8");
+      console.log(`[harness] playbook thin: ${playbook.length} chars, will inject top 3 via vector on before_agent_start`);
     }
   });
 
