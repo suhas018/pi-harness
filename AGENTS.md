@@ -1,19 +1,14 @@
-# AGENTS.md — Guides for pi
+# AGENTS.md — long-term rules only (Gate 1 thin resident)
 
-> Feedforward guide: read before acting. Keep edits small, verifiable, file-backed.
+> Keep edits small, verifiable, file-backed. Skills are on-demand via `$`.
 
-## Conventions
-- Write plans to `memory/short.json`, not todos
-- Every Write → run `sensors/computational.ts` (ruff/mypy/pytest style checks)
-- Every run → append to `runs/<id>/trajectory.jsonl`
-- Learnings → `memory/playbook.md` bullets with `id: description`
+## Rules (always resident)
+- Plans → `memory/short.json`
+- Every Write → `sensors/computational.ts`
+- Every run → `runs/<id>/trajectory.jsonl`
+- 2x failure → new `memory/playbook.md` bullet
 
-## How to use skills
-- `skills/python-conventions/SKILL.md` — Python/FastAPI style
-- `skills/review-sensor/SKILL.md` — how to self-review
-
-## Sensors
-- Fast: `sensors/computational.ts` (deterministic, every Write)
-- Slow: `sensors/judge.ts` (LLM judge, after run)
-
-If a failure repeats 2x, propose a new bullet for `playbook.md` (steering loop).
+## Skills (on-demand via `$`)
+- `$python-conventions` — FastAPI style
+- `$review-sensor` — how to self-review
+- Hidden by default, pulled when needed — keeps Context thin (Chasen gate 1: rules resident, capabilities on-demand).
