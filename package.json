@@ -1,7 +1,7 @@
 {
   "name": "pi-harness",
-  "version": "1.1.0",
-  "description": "Minimal pi outer harness — v1.1 with edit benchmark + Harbor subset 20 + 5/5 eval + vector + meta-harness",
+  "version": "2.0.0",
+  "description": "Minimal pi outer harness — v2.0 Context-efficiency (Chasen 4 gates) — thin resident + filtered tools + subagents + pi-ask",
   "type": "module",
   "private": true,
   "scripts": {

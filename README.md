@@ -1,8 +1,8 @@
-# pi-harness — minimal pi outer harness (file-memory + sensors) — v1.1
+# pi-harness — minimal pi outer harness (file-memory + sensors) — v2.0
 
-![eval](https://img.shields.io/badge/eval-5%2F5-brightgreen) ![sensors](https://img.shields.io/badge/sensors-ruff%20%2B%20qwen-blue) ![memory](https://img.shields.io/badge/memory-file%20%2B%20vector-orange)
+![eval](https://img.shields.io/badge/eval-5%2F5-brightgreen) ![sensors](https://img.shields.io/badge/sensors-ruff%20%2B%20qwen-blue) ![memory](https://img.shields.io/badge/memory-file%20%2B%20vector-orange) ![v2](https://img.shields.io/badge/v2-context--efficiency-blueviolet)
 
-Learn harness engineering by building the outer harness around `earendil-works/pi`. **v1.1** — guides + sensors + file-memory + vector recall + eval + self-improve + meta-harness (edit + Harbor), **5/5** tasks pass. `v1.0` bare-bones frozen at `4/4`.
+Learn harness engineering by building the outer harness around `earendil-works/pi`. **v2.0** — Context-efficiency (Chasen 4 gates): thin resident + filtered tool output + subagents + pi-ask. `v1.1` meta-harness + `v1.0` bare-bones frozen.
 
 **Inner:** `pi` (Read/Write/Edit/Bash + 60+ providers via `pi-ai`)
 **Outer:** your guides + sensors + file-memory that make the inner better.
