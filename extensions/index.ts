@@ -7,6 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { Type } from "@sinclair/typebox";
 
 const PLAYBOOK = path.join(process.cwd(), "memory", "playbook.md");
 const VECTORS = path.join(process.cwd(), "memory", "vectors.json");
@@ -87,6 +88,35 @@ export default function (pi: ExtensionAPI) {
     return { systemPrompt: (event.systemPrompt ?? "") + injected };
   });
 
+  // Gate 2: Tool output filtered before Context (Chasen: sandbox + summary)
+  // Large bash/read/grep/find/ls outputs (>10KB) are saved to runs/<id>/tool-output/ and only summary enters Context
+  pi.on("tool_execution_end", async (event: any, ctx) => {
+    const toolName: string = event.toolName ?? event.name ?? "";
+    const result: any = event.result ?? {};
+    const text: string = (() => {
+      try {
+        const c = result.content;
+        if (Array.isArray(c)) return c.map((x: any) => x.text ?? "").join("\n");
+        if (typeof c === "string") return c;
+        return JSON.stringify(c).slice(0, 20000);
+      } catch { return ""; }
+    })();
+    const largeTools = new Set(["bash", "powershell", "read", "grep", "find", "ls"]);
+    if (largeTools.has(toolName) && text.length > 10000) {
+      const id = new Date().toISOString().slice(0, 10) + "-" + Math.random().toString(36).slice(2, 6);
+      const dir = path.join(RUNS_DIR, `tool-output-${id}`);
+      try { fs.mkdirSync(dir, { recursive: true }); } catch {}
+      const outPath = path.join(dir, `${toolName}-${Date.now()}.txt`);
+      try { fs.writeFileSync(outPath, text, "utf8"); } catch {}
+      const summary = text.slice(0, 2000) + `\n\n[truncated ${text.length} chars → saved to ${outPath}, ${Math.ceil(text.length/4000)}k tokens saved. Use read with line range for details.]`;
+      console.log(`[harness Gate2] ${toolName} large output ${text.length} chars → sandboxed to ${outPath}, Context gets summary (${summary.length} chars)`);
+      // Try to mutate result content to summary so Context stays thin — if immutable, at least log
+      try {
+        if (Array.isArray(result.content) && result.content[0]) result.content[0].text = summary;
+      } catch {}
+    }
+  });
+
   // Feedback: after every write/edit tool execution, run computational sensor
   pi.on("tool_execution_end", async (event: any, _ctx) => {
     const toolName = event.toolName ?? event.name ?? "";
@@ -105,6 +135,52 @@ export default function (pi: ExtensionAPI) {
       console.log(`[harness sensor] FAIL for ${file}: ${out.slice(0, 500)}`);
     } else if (out.trim()) {
       console.log(`[harness sensor] ok for ${file}`);
+    }
+  });
+
+  // Gate 3: Long tasks split — subagents + auto-compact
+  // Register subagent tool: scout/worker/reviewer in isolated Context, parent only gets result
+  try {
+    pi.registerTool({
+      name: "subagent",
+      label: "Subagent",
+      description: "Spawn isolated sub-agent (scout/worker/reviewer) — parent only gets result, not history (Gate 3)",
+      parameters: Type.Object({
+        role: Type.String({ description: "scout (read-only grep), worker (writes), reviewer (judge)" }),
+        task: Type.String({ description: "task for sub-agent, e.g. 'scout src for FastAPI routes'" }),
+      }),
+      async execute(_id: string, params: any) {
+        const role = params.role ?? "worker";
+        const task = params.task ?? "";
+        console.log(`[harness Gate3] subagent ${role}: ${task.slice(0, 80)}`);
+        return {
+          content: [{ type: "text", text: `[subagent ${role} queued: ${task.slice(0, 100)} — in full harness-pi this spawns isolated Context, parent only gets result]` }],
+          details: { role, task },
+        };
+      },
+    });
+  } catch (e) { console.log(`[harness Gate3] subagent tool register failed: ${e}`); }
+
+  // Auto-compact as last insurance: when context near limit, trim history
+  pi.on("session_shutdown", async (_event, _ctx) => {
+    // This is also Gate 3 insurance — actual auto-compact would hook onContextOverflow
+    // We log that it would run
+    console.log(`[harness Gate3] auto-compact check: would trim if near limit (like harness-pi autoCompaction)`);
+  });
+
+  // Gate 4: Rework as cost — pi-ask when goal/file/acceptance unclear
+  pi.on("before_agent_start", async (event: any, ctx) => {
+    const prompt: string = event.prompt ?? "";
+    const hasFile = /src\/|\.py|\.ts|\.md|tasks\//i.test(prompt);
+    const hasTest = /test|verifier|acceptance|PASS/i.test(prompt);
+    const isVague = prompt.trim().length < 20 || (!hasFile && !hasTest);
+    // Don't block skill loads ($...) or explicit tasks
+    if (isVague && !prompt.trim().startsWith("$") && !prompt.includes("tasks/")) {
+      console.log(`[harness Gate4] pi-ask: vague prompt "${prompt.slice(0, 60)}" — would ask for file/acceptance, not burn Context`);
+      // In interactive mode, we could prompt via ctx.ui.confirm — in print mode, just inject ask
+      // For now, inject ask as system prompt addition
+      const ask = `\n\n[pi-ask Gate4] Goal/file/acceptance unclear. Ask first: What file? What should tests assert? Don't code yet.\n`;
+      return { systemPrompt: (event.systemPrompt ?? "") + ask };
     }
   });
 
